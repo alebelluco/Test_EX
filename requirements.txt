@@ -9,3 +9,4 @@ collection
 openpyxl
 matplotlib-inline
 ipython
+xlrd
