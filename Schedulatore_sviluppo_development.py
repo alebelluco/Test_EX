@@ -149,7 +149,8 @@ with tab1:
     mese['Durata_stimata'] = np.where(mese['Min']>0, mese['Min'], media_intervento)
 
 
-    standby = mese[['(STANDBY)' in nota for nota in mese['IstruzioniOperative'].astype(str)]]
+    #standby = mese[['(STANDBY)' in nota for nota in mese['IstruzioniOperative'].astype(str)]]
+    standby = df_raw[['(STANDBY)' in nota for nota in df_raw['IstruzioniOperative'].astype(str)]]
     mese = mese[['(STANDBY)' not in nota for nota in mese['IstruzioniOperative'].astype(str)]]
    
     
