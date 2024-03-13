@@ -10,3 +10,5 @@ openpyxl
 matplotlib-inline
 ipython
 xlrd
+folium
+streamlit_folium
