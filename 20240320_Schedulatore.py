@@ -425,7 +425,7 @@ with tab4:
                 disp_intervento = np.arange(1,31, step=1)
                 
                 disp_adj = [elemento for elemento in disp_intervento if elemento >= (data_first).day]
-                st.write(disp_adj)
+                
                 planned['range'].iloc[i] = disp_adj
 
             if planned['S'].iloc[i]=='F*': # metto il vincolo sulla data degli interventi improrogabili
