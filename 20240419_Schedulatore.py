@@ -63,7 +63,6 @@ with tab4:
     path_clara = 'https://github.com/alebelluco/Test_EX/blob/main/Allowed.csv?raw=True'
     #path_clara = 'https://github.com/alebelluco/Test_EX/blob/main/Clara_allowed.csv?raw=True'
     
-
     #ordine_siti = pd.read_excel('/Users/Alessandro/Documents/AB/Clienti/AB/Exera/Programmazione/Siti_territoriali.xlsx')
     #ordine_siti = pd.read_csv('https://github.com/alebelluco/Test_EX/blob/main/Siti_territoriali.csv', delimiter=';')#, on_bad_lines='skip')
     ordine_siti = pd.read_csv('https://github.com/alebelluco/Test_EX/blob/main/Siti_territoriali2.csv?raw=True', delimiter=';')
@@ -75,12 +74,13 @@ with tab4:
     #siti=pd.read_excel('https://github.com/alebelluco/Exera/blob/main/cantieri.xls')
     #siti = pd.read_csv('/Users/Alessandro/Documents/AB/Clienti/AB/Exera/Programmazione/Flatfiles/cantieri.csv',delimiter=';')
     siti = pd.read_csv('https://github.com/alebelluco/Test_EX/blob/main/cantieri.csv?raw=True',delimiter=';')
-
     siti = siti[['id sito','lat','lng']]
 
     anno_corrente = 2024
-    #oggi = datetime.now().date()
-    deltas = {30:5,15:2,10:2,7:1,7.5:1,6:1,1:0,2:0, 4:1}
+    # oggi = datetime.now().date()
+
+    # modificare bimensile +- 5 gg
+    deltas = {30:3,15:2,10:2,7:1,7.5:1,6:1,1:0,2:0, 4:1}
     viaggi = dict(zip(ordine_siti.SitoTerritoriale, ordine_siti.ViaggioAR))
 
     def calendario_no_domeniche (mese, anno, operatore): #in realtà non ci sono neanche i sabati
@@ -130,7 +130,6 @@ with tab4:
     st.subheader('',divider='grey')
 
     # Caricamento file estratto da Byron
-
     percorso = st.sidebar.file_uploader(f"Caricare l' elenco interventi estratto da Byron")
     while percorso is None:
         st.stop()
@@ -138,7 +137,6 @@ with tab4:
     df_raw=pd.read_excel(percorso, engine='xlrd')
 
     # pulizia dati nan
-
     df_raw.Sito = df_raw.Sito.astype(str).replace({'nan':'non disponibile'})
     df_raw['SitoTerritoriale'] = [word[:-3] for word in df_raw.SitoTerritoriale.astype(str)]
 
@@ -150,8 +148,6 @@ with tab4:
     df_raw = df_raw[[all(voce not in check for voce in fattura) for check in df_raw['IstruzioniOperative'].astype(str)]]
     #rimozione ferrara tua
     df_raw = df_raw[df_raw.Cliente != 'FERRARA TUA SPA']
-
-
 
     #selected = ['FERRARA ','PMI 1','PMI 2']
     #df_raw = df_raw[[(any(elemento in check for elemento in selected)) for check in df_raw.SitoTerritoriale.astype(str)]]
@@ -302,7 +298,7 @@ with tab4:
     df_out = df_out.drop_duplicates()
     df_out['key_univoca']=df_out.key + df_out.Periodicita
 
-    output = pianificabile[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','key','key_sito','key_univoca','Durata_stimata','Descrizione Contratto']]#------------------
+    output = pianificabile[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','key','key_sito','key_univoca','Durata_stimata','Descrizione Contratto','SitoTerritoriale']]#------------------
     output = output.merge(df_out,how='left', left_on='key_univoca', right_on='key_univoca')
     output = output.merge(sito, how='left', left_on='key_sito', right_on='key_sito')
     output = output.sort_values(by=['Cliente','Sito','Periodicita','ID_y','rank'])
@@ -385,12 +381,16 @@ with tab4:
         
     planned = planned.rename(columns={'ID_x':'ID'})
     planned = planned[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','Periodicita','rank','Conteggio','Conteggio_distinti','ultimo_intervento','ultimo_pianificato',
-                    'ultimo_intervento_check','Target','Servizi sul sito','TGT_new','last','periodo','key_sito','Durata_stimata','range']]
+                    'ultimo_intervento_check','Target','Servizi sul sito','TGT_new','last','periodo','key_sito','Durata_stimata','range','Descrizione Contratto','SitoTerritoriale']]
 
     st.subheader('Interventi scaduti', divider='orange')
+    
+    #st.write(planned[[parola[0:1]=='U' for parola in  planned.Cliente]])
+    #st.stop()
+    altri_siti = planned.copy()
 
     with st.expander('Visualizza interventi in ritardo'):
-
+    
     #------------------------------------------------------------------------------------------------------da qui inizio il raggruppamento di disponibilità vicine 
 
         planned['day']=[data.day for data in planned.TGT_new]
@@ -667,6 +667,7 @@ with tab4:
 
     vincolo_nop = df[['ID','Operatore','Operatore2']]
     #altri_siti  = altri_siti.merge(vincolo_nop, how='left',left_on='ID',right_on='ID')
+    
     altri_siti  = altri_siti.merge(vincolo_nop, how='left',left_on='ID',right_on='ID')
 
     altri_siti['Mensile1'] = [ctr[1:2] for ctr in altri_siti['Descrizione Contratto']]
@@ -675,8 +676,10 @@ with tab4:
     altri_siti = altri_siti.rename(columns={'Operatore':'N_op', 'Operatore2':'Op_vincolo'})
 
     def convert_df(df):
-        return df.to_csv(index=False,decimal=',').encode('utf-8')   # messo index=False
-    
+        #return df.to_csv(index=False,decimal=',').encode('utf-8')   # messo index=False
+        return df.to_csv(index=False,decimal=',').encode() 
+
+
     csv_altri = convert_df(altri_siti)
     st.download_button(
         label="Download interventi altri siti",
