@@ -113,16 +113,13 @@ with tab4:
                 
         return cal
 
-
     col_a, col_b = st.columns([4,1])
     with col_a:
         st.title('Schedulatore interventi')
         st.write ('Il cliente FERRARA TUA è escluso dalla schedulazione')
         st.write('Versione aggionata del 04/04/2024 - Modifiche introdotte:')
         st.write('- Correzione Siti Territoriali  dopo modifica Byron')
-        
-     
-        
+            
     with col_b:
         #st.image('/Users/Alessandro/Documents/AB/Clienti/AB/Exera/exera_logo.png')
         st.image('https://github.com/alebelluco/Test_EX/blob/main/exera_logo.png?raw=True')
@@ -144,19 +141,19 @@ with tab4:
     df_raw = df_raw.merge(siti,how='left',left_on='IdSito',right_on='id sito')
 
     #rimozione voci fatturazione
-    fattura = ['FATTURAZIONE','fatturazione','Fatturazione']
-    df_raw = df_raw[[all(voce not in check for voce in fattura) for check in df_raw['IstruzioniOperative'].astype(str)]]
+    #fattura = ['FATTURAZIONE','fatturazione','Fatturazione']
+    #df_raw = df_raw[[all(voce not in check for voce in fattura) for check in df_raw['IstruzioniOperative'].astype(str)]]
     #rimozione ferrara tua
     df_raw = df_raw[df_raw.Cliente != 'FERRARA TUA SPA']
-
-    #selected = ['FERRARA ','PMI 1','PMI 2']
-    #df_raw = df_raw[[(any(elemento in check for elemento in selected)) for check in df_raw.SitoTerritoriale.astype(str)]]
+    df_raw = df_raw[df_raw['Operatore'] != ' (FAT) (FAT)']
 
     #creazione delle chiavi
     df_raw['key'] = df_raw.Cliente + df_raw.Sito + " | " + df_raw['Indirizzo Sito'] + df_raw.Servizio
     #df_raw['key_sito'] =  df_raw.Cliente + df_raw.Sito + " | " + df_raw['Indirizzo Sito']
     df_raw['key_sito'] =  df_raw.Cliente.astype(str) + df_raw.Sito.astype(str) + df_raw['Indirizzo Sito'].astype(str)
     df_raw['key_univoca'] = df_raw.Cliente + df_raw.Sito + " | " + df_raw['Indirizzo Sito'] + df_raw.Servizio + df_raw.Periodicita
+
+
 
     df_raw = df_raw[df_raw['key'] != 'VETRORESINA SPA sede op, QUARTIERE |  VIA PRAFITTA BERTOLINA 4/A , QUARTIERE 44015 , FESM DEMUSCAZIONE']
 
@@ -298,7 +295,7 @@ with tab4:
     df_out = df_out.drop_duplicates()
     df_out['key_univoca']=df_out.key + df_out.Periodicita
 
-    output = pianificabile[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','key','key_sito','key_univoca','Durata_stimata','Descrizione Contratto','SitoTerritoriale']]#------------------
+    output = pianificabile[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','key','key_sito','key_univoca','Durata_stimata','Descrizione Contratto','SitoTerritoriale','lat','lng','IstruzioniOperative','Citta']]#------------------
     output = output.merge(df_out,how='left', left_on='key_univoca', right_on='key_univoca')
     output = output.merge(sito, how='left', left_on='key_sito', right_on='key_sito')
     output = output.sort_values(by=['Cliente','Sito','Periodicita','ID_y','rank'])
@@ -363,10 +360,10 @@ with tab4:
                     if str(last)=='NaT':
                         last = output['ultimo_intervento'].iloc[i]
 
-                if output.key_univoca.iloc[i] == output.key_univoca.iloc[i-1]: # per raggruppare sullo stesso giorno gli interventi dell'università
-                    tgt_new = planned.TGT_new.loc[i-1]
-                else:
-                    tgt_new = last + timedelta(days = periodo)
+                #if output.key_univoca.iloc[i] == output.key_univoca.iloc[i-1]: # per raggruppare sullo stesso giorno gli interventi dell'università
+                #    tgt_new = planned.TGT_new.loc[i-1]
+                #else:
+                tgt_new = last + timedelta(days = periodo)
 
                 planned.loc[i]=output.iloc[i]
                 if tgt_new.month == mese_n:
@@ -380,20 +377,17 @@ with tab4:
         planned['periodo'].loc[i]=periodo
         
     planned = planned.rename(columns={'ID_x':'ID'})
-    planned = planned[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','Periodicita','rank','Conteggio','Conteggio_distinti','ultimo_intervento','ultimo_pianificato',
-                    'ultimo_intervento_check','Target','Servizi sul sito','TGT_new','last','periodo','key_sito','Durata_stimata','range','Descrizione Contratto','SitoTerritoriale']]
+    planned = planned[['ID','S','Data Inizio','Cliente','Sito','Citta','Indirizzo Sito','Servizio','Periodicita','rank','Conteggio','Conteggio_distinti','ultimo_intervento','ultimo_pianificato',
+                    'ultimo_intervento_check','Target','Servizi sul sito','TGT_new','last','periodo','key_sito','Durata_stimata','range','Descrizione Contratto','SitoTerritoriale','lat','lng','IstruzioniOperative']]
 
     st.subheader('Interventi scaduti', divider='orange')
-    
-    #st.write(planned[[parola[0:1]=='U' for parola in  planned.Cliente]])
-    #st.stop()
-    altri_siti = planned.copy()
 
     with st.expander('Visualizza interventi in ritardo'):
     
     #------------------------------------------------------------------------------------------------------da qui inizio il raggruppamento di disponibilità vicine 
 
         planned['day']=[data.day for data in planned.TGT_new]
+        planned['Ritardo']=None
 
         count_scaduto = 0
         for i in range(len(planned)):   
@@ -409,14 +403,14 @@ with tab4:
                 #st.write(disp_adj)
                 if disp_adj != []:
                     planned['range'].iloc[i] = disp_adj
-                else:
-                    
+                else:                    
                     #if any([elemento <= data_first.day for elemento in disp_intervento]): #se non sono tutti nel futuro
                     planned['range'].iloc[i] = np.arange(data_first.day,data_first.day+3,step=1) # riproposto in un range a partire dal primo giorno disponibile + 3 giorni 
                     if planned.Target.astype(str).iloc[i] != 'nan':
                         if planned.Target.iloc[i].month == mese_n and planned.Target.iloc[i].month is not None :
                             planned['range'].iloc[i] = np.arange(data_first.day,data_first.day+3,step=1) # riproposto in un range a partire dal primo giorno disponibile + 3 giorni 
                             #st.write(f'Attenzione: intervento ID {planned.ID.iloc[i]} | :orange[Cliente: {planned.Cliente.iloc[i]} ]| fuori target - ripianificato ')
+                            planned['Ritardo'].iloc[i]='x'
                             st.write(f'Attenzione: intervento ID {planned.ID.iloc[i]}  |  :orange[Cliente: {planned.Cliente.iloc[i]} ]  |  ultimo intervento: :orange[{str(planned.ultimo_intervento.iloc[i])[:10]}]')
                             count_scaduto += 1
                     #else:
@@ -440,6 +434,7 @@ with tab4:
                                 if planned.Target.iloc[i].month == mese_n and planned.Target.iloc[i].month is not None :
                                     planned['range'].iloc[i] = np.arange(data_first.day,data_first.day+3,step=1) # riproposto in un range a partire dal primo giorno disponibile + 3 giorni 
                                     st.write(f'Attenzione: intervento ID {planned.ID.iloc[i]}  |  :orange[Cliente: {planned.Cliente.iloc[i]} ]  |  ultimo intervento: :orange[{str(planned.ultimo_intervento.iloc[i])[:10]}]')
+                                    planned['Ritardo'].iloc[i]='x'
                                     count_scaduto += 1
                         else:
                             planned['range'].iloc[i] = [elemento for elemento in disp_intervento if (elemento <= data_last)]
@@ -455,6 +450,10 @@ with tab4:
                 disp_intervento = [planned['Data Inizio'].iloc[i].day]
                 planned['range'].iloc[i] = disp_intervento
 
+    
+#--------    altri_siti = planned.copy()
+#--------    altri_siti['TGT_new']=altri_siti['TGT_new'].astype(str)
+
     st.write(':red[Attenzione {} interventi in ritardo]'.format(count_scaduto))
     planned_print=planned[['ID','Cliente','Indirizzo Sito','Servizio','Periodicita','ultimo_intervento','periodo','range']]
     #planned_print['TGT_new']=planned_print['TGT_new'].astype(str)
@@ -462,61 +461,16 @@ with tab4:
     st.write('**Date disponibili per interventi**')
     st.dataframe(planned_print)
 
+
     #–-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    planned['gruppo'] = None
-    planned['disp_new'] = None
-    gruppo = 1
-    planned['gruppo'].iloc[0]=gruppo
-    planned['disp_new'].iloc[0] = planned['range'].iloc[0]
-    for i in range(1,len(planned)):
-        sito = planned['key_sito'].iloc[i] 
-        if sito == planned['key_sito'].iloc[i-1]:
-            comuni = list(set(planned.disp_new.iloc[i-1]) & set(planned.range.iloc[i])) # elementi comuni
-            if comuni != []: # se ci sono elementi in comune
-                planned['disp_new'].iloc[i] = comuni
-                planned['gruppo'].iloc[i] = planned['gruppo'].iloc[i-1]
-            else:
-                planned['disp_new'].iloc[i] = planned['range'].iloc[i]
-                gruppo += 1
-                planned['gruppo'].iloc[i]=gruppo
+    
 
-        else:
-            planned['disp_new'].iloc[i] = planned['range'].iloc[i]
-            gruppo += 1
-            planned['gruppo'].iloc[i]=gruppo
-
-
-    gruppi = planned[['gruppo','disp_new']].groupby(by='gruppo').last()
-    durata_gruppi = planned[['gruppo','Durata_stimata']].groupby(by='gruppo').sum() #-----------------------da mergiare con df
-    durata_gruppi = durata_gruppi.rename(columns={'Durata_stimata':'Durata_gruppo'})
-    count_gruppi = planned[['gruppo','ID']].groupby(by='gruppo').count()
-    count_gruppi = count_gruppi.rename(columns={'ID':'count_gruppo'})
-
-    planned = planned.merge(gruppi, how='left', left_on = 'gruppo',right_on='gruppo')
-    planned = planned.rename(columns={'disp_new_y':'available'})
-
-    date_target = planned[['ID','available','gruppo']]
+    #date_target = planned[['ID','available','gruppo']]
 
     #-----------------------------------------------------------------------------------------------------------------------------------------assegnazione agli operatori
 
     colonne=['ID','Data Inizio','Cliente', 'Sito', 'Indirizzo Sito', 'SitoTerritoriale','Servizio','Periodicita','ID Contratto', 'Citta','Operatore','Operatore2','Durata_stimata','IstruzioniOperative','Note', 'lat','lng','key_sito','Descrizione Contratto']
-
-    df = pianificabile[colonne]
-
-    df = df.merge(date_target, how='left', left_on='ID',right_on='ID')
-    df = df.rename(columns={'available':'Target_range'})
-    df = df.merge(ordine_siti, how='left', left_on='SitoTerritoriale', right_on='SitoTerritoriale')
-    df = df.merge(durata_gruppi, how='left', left_on='gruppo', right_on='gruppo')
-    df = df.merge(count_gruppi, how='left', left_on='gruppo', right_on='gruppo')
-
-    df['minimo'] = [min(intervallo) for intervallo in df.Target_range] # ordine crescente per data
-    df = df.sort_values(by=['SitoTerritoriale','Citta','minimo','Cliente'])
-    df['Stimato']=df['Durata_stimata']/60
-
-    df['allowed']=None
-    for i in range(len(df)):
-        df['allowed'].iloc[i]=[0,1,2,3,4,5]
 
     #------------------------------------------------------------------------------------------------------------ Disponibilità siti Clara
     #clara_allowed = pd.read_excel(path_clara).fillna(0)
@@ -555,130 +509,35 @@ with tab4:
                 lista.append(i)
         clara_allowed['allowed'].iloc[j]=lista
         lista=[]
-            
+
+
     clara_allowed = clara_allowed[['allowed','key','orari']]
-# keysito
-    #-----------------------
-    df['check'] = False
-    #------------------------------------------------------------------------------------------------------------ Recupero info disponibilità Clara
-    df = df.merge(clara_allowed, how='left', left_on='key_sito', right_on='key')
-    df['allowed']=np.where(df.allowed_y.astype(str) != 'nan', df.allowed_y, df.allowed_x)
-
-    df=df.drop(['allowed_x','allowed_y'], axis=1)
-
-
-    #-------------------------------------------# INDIVISIBILITà GRUPPI
-
-    df = df.sort_values(by=['gruppo','ID'], ascending=False)
-    df['check']=False
-    for i in range(1,len(df)):
-        if df['gruppo'].iloc[i]==df['gruppo'].iloc[i-1]:
-            df['check'].iloc[i]=True
-            df['Durata_gruppo'].iloc[i]=df['Durata_stimata'].iloc[i]
-        else:
-            df['check'].iloc[i]=False
 
     #-----------------------------------------------------------------------------------------------
 
-    df['ID']=df['ID']*10 # così posso inserire i duplicati
-    df = df.sort_values(by=['Ordine_sito','Citta','gruppo','ID'],ascending=False)
-    df = df.reset_index(drop=True)
-    df['SitoTerritoriale'] = df.SitoTerritoriale.astype(str).replace({'nan':'Non_definito'})
-    df['Citta'] = df.Citta.astype(str).replace({'nan':'Non_definito'})
-    colonne_new = df.columns
-
-    altri_siti = df[['ID','Cliente','Sito','Indirizzo Sito','IstruzioniOperative','orari','Note','Servizio','Periodicita','SitoTerritoriale','Citta','Durata_stimata','Target_range','lat','lng','Descrizione Contratto']]
-
+    #altri_siti = df[['ID','Cliente','Sito','Indirizzo Sito','IstruzioniOperative','orari','Note','Servizio','Periodicita','SitoTerritoriale','Citta','Durata_stimata','Target_range','lat','lng','Descrizione Contratto']]
+    altri_siti = planned.copy()
     #--------------------------------------------------------------------------------------------------------------------------FILTRO SOLO FERRARA 
 
-    selected = ['FERRARA ','PMI 1','PMI 2']
-    df = df[[(any(elemento in check for elemento in selected)) for check in df.SitoTerritoriale.astype(str)]]
-    #altri_siti = altri_siti[[all(elemento not in cliente for elemento in selected) for cliente in altri_siti.SitoTerritoriale.astype(str)]]
 
-    #------------------------------------------------------------------------------------------------------------ COSTRUZIONE AGENDE
-
-    viaggio_ar= 0.5 #andata + ritorno
-    viaggio_medio=0.2
-
-    op = 1
-    index_giorno = 0
-    wl=0
-
-    limite = 7.5
-    # sdoppio le righe con wl < 1gg
-    
-    #df['check'] = False
-    df['nota_AB']= None
-
-
-    
-    #-------------------------------------------------------------duplicazione righe con durata > 1gg
-    for i in range(len(df)): 
-        wl = df['Durata_stimata'].iloc[i] / 60 + viaggio_ar
-        if (wl > limite) and (df['check'].iloc[i] == False): # condizione per sdoppiare le righe di durata > 1gg
-
-            y = len(df)
-
-            df.loc[y] = df.iloc[i] 
-            #durata_new = df['Durata_stimata'].iloc[i] - limite * 60 + viaggio_ar * 60 + 10
-            durata_new = limite * 60 - viaggio_ar * 60
-            df['Durata_stimata'].loc[y] = durata_new
-            df['Stimato'].loc[y]=df['Durata_stimata'].loc[y]/60
-            df['nota_AB'].loc[y] = 'con_seguito' # in modo da bloccare il successivo sulla data+1
-
-            df.loc[y+1] = df.iloc[i]
-            df['Durata_stimata'].loc[y+1] = df['Durata_stimata'].iloc[i] - durata_new
-            df['Stimato'].loc[y+1]=df['Durata_stimata'].loc[y+1]/60
-            df['ID'].loc[y+1] = df['ID'].iloc[i] - 1 # per metterlo successivo
-            df['nota_AB'].loc[y+1]= 'segue'
-            df['check'].loc[y+1]=True # non viene pianificato prima che sia pianificato suo padre (la prima parte del lavoro, che sbloccherà questa)
-            df['check'].iloc[i]=True # così poi non viene più pianificata
-            df = df.drop([i])
-            df = df.sort_values(by=['N_op','Ordine_sito','Citta','ID'],ascending=False)
-            df = df.reset_index(drop=True)           
-
-    pianificato = pd.DataFrame(columns=colonne_new)
-
-    pianificato['data']=None
-    pianificato['operatore']=None
-    pianificato['Ora_Inizio']=None
-    pianificato['Ora_Fine']=None
-    pianificato['N_op'] = None
-    pianificato['Op_vincolo'] = None
-    pianificato['wl']=0
-    pianificato['tgtrange']=None
-
-    df['check2']=None
-
-    assegnati = {1:[]}
-
-    sito = df.SitoTerritoriale.iloc[0]
-
-    cal = calendario_no_domeniche(mese_n,anno_corrente,op) 
-    contatore = 0
-
-    limite_dist = 10
-    wl=0
-    wl_gruppo=0
-
-    df_work = df.copy()
-
-    df = df_work[df_work.Operatore == ' 2 OPERATORI'] # priorità ai 2 op
-
-    vincolo_nop = df[['ID','Operatore','Operatore2']]
-    #altri_siti  = altri_siti.merge(vincolo_nop, how='left',left_on='ID',right_on='ID')
-    
+    vincolo_nop = df_raw[['ID','Operatore','Operatore2']]
     altri_siti  = altri_siti.merge(vincolo_nop, how='left',left_on='ID',right_on='ID')
 
-    altri_siti['Mensile1'] = [ctr[1:2] for ctr in altri_siti['Descrizione Contratto']]
+
+    altri_siti['Mensile1'] = [ctr[1:2] for ctr in altri_siti['Descrizione Contratto'].astype(str) ]
     altri_siti['Mensile'] = np.where(altri_siti['Mensile1'].astype(str)=='*','si','no')
     altri_siti = altri_siti.drop(columns=['Mensile1'])
-    altri_siti = altri_siti.rename(columns={'Operatore':'N_op', 'Operatore2':'Op_vincolo'})
+    altri_siti = altri_siti.rename(columns={'Operatore':'N_op', 'Operatore2':'Op_vincolo','range':'Target_range'})
+    altri_siti['TGT_new']=altri_siti['TGT_new'].astype(str)
+    altri_siti['Durata_stimata']=altri_siti['Durata_stimata'].astype(float)
+    altri_siti['Note'] = None
+    altri_siti['orari']=None
+
+    st.write(altri_siti)
+    #altri_siti = altri_siti.merge(clara_allowed[['allowed','key']], how='left',left_on='key_sito',right_on='key')
 
     def convert_df(df):
-        #return df.to_csv(index=False,decimal=',').encode('utf-8')   # messo index=False
         return df.to_csv(index=False,decimal=',').encode() 
-
 
     csv_altri = convert_df(altri_siti)
     st.download_button(
@@ -687,4 +546,28 @@ with tab4:
         file_name='Altri_siti.csv',
         mime='text/csv',
         )  
+
+
+
+# altri siti è una copia di planned
+
+
+#riga 380
+#---------------
+# planned = planned[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','Periodicita','rank','Conteggio','Conteggio_distinti','ultimo_intervento','ultimo_pianificato',
+#                    'ultimo_intervento_check','Target','Servizi sul sito','TGT_new','last','periodo','key_sito','Durata_stimata','range','Descrizione Contratto','SitoTerritoriale','lat','lng','IstruzioniOperative','Citta']]
+
+
+# colonne = output.columns planned ha queste colonne
+
+# r 298
+# output = pianificabile[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Servizio','key','key_sito','key_univoca','Durata_stimata','Descrizione Contratto','SitoTerritoriale','lat','lng','IstruzioniOperative','Citta']]
+    
+# r 249
+# pianificabile = pianificabile[['ID','S','Data Inizio','Cliente','Sito','Indirizzo Sito','Dispositivi Installati','SitoTerritoriale','Servizio','ID Contratto','Codice Contratto','Citta',
+#                                'Operatore','Min','Periodicita','Operatore2','key','key_sito','key_univoca','Durata_stimata','IstruzioniOperative', 'Note','lat','lng','Descrizione Contratto']]
+
+
+# pianificabile parte da mese (tutte colonne)
+
 
