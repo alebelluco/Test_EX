@@ -557,6 +557,12 @@ with tab4:
     st.write(altri_siti)
     #altri_siti = altri_siti.merge(clara_allowed[['allowed','key']], how='left',left_on='key_sito',right_on='key')
 
+    for i in range(len(altri_siti)):
+        numeri = altri_siti['Target_range'].iloc[i]
+        interi = [int(n) for n in numeri]
+        altri_siti['Target_range'].iloc[i] = interi
+
+    
     def convert_df(df):
         return df.to_csv(index=False,decimal=',').encode() 
 
