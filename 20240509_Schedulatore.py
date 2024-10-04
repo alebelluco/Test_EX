@@ -265,7 +265,7 @@ with tab4:
     a_p = pianificati.data_AB.max().date()
 
     with col3:
-        st.title(f':white[{len_p}]')
+        st.title(f'{len_p}')
         st.write('Interventi pianificati in attesa di esecuzione dal {} al {}'.format(da_p,a_p))
 
     pianificabile = pianificabile[[(any(check in word for check in filtro_pianificati)) or (word == 'nan') for word in pianificabile.Operatore.astype(str)]]
