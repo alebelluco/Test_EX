@@ -11,7 +11,7 @@ import math
 import xlrd
 
 st.set_page_config(page_title="Planner interventi", layout='wide')
-
+anno_corrente = 2025
 tab1, tab4 = st.tabs(['Scaduto', 'Input programmazione'])
 
 with tab1:
@@ -27,7 +27,9 @@ with tab1:
     if not percorso_scaduto:
         st.stop()
     df_scaduto=pd.read_excel(percorso_scaduto, engine='xlrd')
-    df_scaduto = df_scaduto[(df_scaduto.S != 'C') & ([data.month < oggi.month for data in df_scaduto['Data Inizio']])]
+    #df_scaduto = df_scaduto[(df_scaduto.S != 'C') & ([data.month < oggi.month for data in df_scaduto['Data Inizio']])]
+    df_scaduto = df_scaduto[(df_scaduto.S != 'C') & (df_scaduto['year'] != anno_corrente)]
+    
     df_scaduto['Cntr'] = np.where(['TIPO' in word for word in df_scaduto['Descrizione Contratto'].astype(str)],'TIPO',None)
     df_scaduto = df_scaduto[['S','Data Inizio','Cliente','IstruzioniOperative','Descrizione Contratto','Referente/Amm. Condominio','Sito','Citta','Indirizzo Sito','SitoTerritoriale','Servizio','Cntr']]
     df_scaduto_standby = df_scaduto[['(STANDBY)' in istruzione for istruzione in df_scaduto['IstruzioniOperative'].astype(str)]]
@@ -76,7 +78,7 @@ with tab4:
     siti = pd.read_csv('https://github.com/alebelluco/Test_EX/blob/main/cantieri.csv?raw=True',delimiter=';')
     siti = siti[['id sito','lat','lng']]
 
-    anno_corrente = 2024
+    
     # oggi = datetime.now().date()
 
     # modificare bimensile +- 5 gg
