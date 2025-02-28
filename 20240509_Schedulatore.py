@@ -32,7 +32,7 @@ with tab1:
     df_scaduto=pd.read_excel(percorso_scaduto, engine='xlrd')
     df_scaduto['year'] = [data.year for data in df_scaduto['Data Inizio']]
 
-     if st.toggle('mese successivo'):
+    if st.toggle('mese successivo'):
         df_scaduto = df_scaduto[(df_scaduto.S != 'C') & ([data.month < oggi.month+1 for data in df_scaduto['Data Inizio']])]
     else:
         df_scaduto = df_scaduto[(df_scaduto.S != 'C') & ([data.month < oggi.month for data in df_scaduto['Data Inizio']])]
