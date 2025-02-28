@@ -26,10 +26,16 @@ with tab1:
     percorso_scaduto = st.sidebar.file_uploader(f"Caricare l'elenco interventi estratto da Byron da 1 gennaio a oggi, tutti gli interventi")
     if not percorso_scaduto:
         st.stop()
+
+
+   
     df_scaduto=pd.read_excel(percorso_scaduto, engine='xlrd')
     df_scaduto['year'] = [data.year for data in df_scaduto['Data Inizio']]
-    df_scaduto = df_scaduto[(df_scaduto.S != 'C') & ([data.month < oggi.month for data in df_scaduto['Data Inizio']])]
-    #df_scaduto = df_scaduto[(df_scaduto.S != 'C') & (df_scaduto['year'] != anno_corrente)] - questo serve solo a gennaio
+
+     if st.toggle('mese successivo'):
+        df_scaduto = df_scaduto[(df_scaduto.S != 'C') & ([data.month < oggi.month+1 for data in df_scaduto['Data Inizio']])]
+    else:
+        df_scaduto = df_scaduto[(df_scaduto.S != 'C') & ([data.month < oggi.month for data in df_scaduto['Data Inizio']])]
 
     df_scaduto['Cntr'] = np.where(['TIPO' in word for word in df_scaduto['Descrizione Contratto'].astype(str)],'TIPO',None)
     df_scaduto = df_scaduto[['S','Data Inizio','Cliente','IstruzioniOperative','Descrizione Contratto','Referente/Amm. Condominio','Sito','Citta','Indirizzo Sito','SitoTerritoriale','Servizio','Cntr']]
