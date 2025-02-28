@@ -12,7 +12,7 @@ import xlrd
 
 st.set_page_config(page_title="Planner interventi", layout='wide')
 anno_corrente = 2025
-tab1, tab4 = st.tabs(['Scaduto', 'Input programmazione'])
+tab1, tab4, tab_siti = st.tabs(['Scaduto', 'Input programmazione', 'Errori coordinate'])
 
 with tab1:
     mesi_scaduto = {1:'Gennaio', 2:'Febbraio',3:'Marzo',4:'Aprile',5:'Maggio',6:'Giugno',7:'Luglio',8:'Agosto',9:'Settembre',10:'Ottobre',11:'Novembre', 12:'Dicembre'}
@@ -73,11 +73,14 @@ with tab4:
     ordine_siti['ViaggioAR'] = [stringa.replace(',','.') for stringa in ordine_siti.ViaggioAR]
     ordine_siti['ViaggioAR'] = ordine_siti['ViaggioAR'].astype(float)
 
-    #siti=pd.read_excel('/Users/Alessandro/Documents/AB/Clienti/AB/Exera/cantieri.xls')
-    #siti=pd.read_excel('https://github.com/alebelluco/Exera/blob/main/cantieri.xls')
-    #siti = pd.read_csv('/Users/Alessandro/Documents/AB/Clienti/AB/Exera/Programmazione/Flatfiles/cantieri.csv',delimiter=';')
-    siti = pd.read_csv('https://github.com/alebelluco/Test_EX/blob/main/cantieri.csv?raw=True',delimiter=';')
+
+    siti = pd.read_pickle('https://github.com/alebelluco/Test_EX/blob/main/cantieri_aggiornato?raw=True')
+    siti_no_coord = siti[siti.lat.astype(str)=='nan']
+    siti_errori = siti[siti.lat==0]
     siti = siti[['id sito','lat','lng']]
+    siti = siti[(siti.lat.astype(str)!='nan') & (siti.lng.astype(str)!='nan') & (siti.lat!=0) & (siti.lng!=0)]
+    siti.lat = [str(lat).replace('.',',') for lat in siti.lat]
+    siti.lng = [str(lng).replace('.',',') for lng in siti.lng]
 
     
     # oggi = datetime.now().date()
@@ -587,7 +590,15 @@ with tab4:
         file_name='Altri_siti.csv',
         mime='text/csv',
         )  
+    
+with tab_siti:
+    st.write('Siti con coordinete mancanti')
+    st.dataframe(siti_no_coord)
 
+    st.divider()
+
+    st.write('Siti con errori')
+    st.dataframe(siti_errori)
 
 
 # altri siti è una copia di planned
