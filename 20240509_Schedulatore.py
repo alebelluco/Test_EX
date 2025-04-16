@@ -159,6 +159,7 @@ with tab4:
         st.stop()
 
     df_raw=pd.read_excel(percorso, engine='xlrd')
+    df_raw = df_raw[df_raw['Codice Contratto']!= 'CO-1870-2021']
     st.write(df_raw)
     
     # pulizia dati nan
