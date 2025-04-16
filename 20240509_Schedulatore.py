@@ -159,6 +159,7 @@ with tab4:
         st.stop()
 
     df_raw=pd.read_excel(percorso, engine='xlrd')
+    st.write(df_raw)
     
     # pulizia dati nan
     df_raw.Sito = df_raw.Sito.astype(str).replace({'nan':'non disponibile'})
@@ -581,12 +582,10 @@ with tab4:
     #altri_siti = altri_siti.merge(clara_allowed[['allowed','key']], how='left',left_on='key_sito',right_on='key')
 
     for i in range(len(altri_siti)):
-        try:
-            numeri = altri_siti['Target_range'].iloc[i]
-            interi = [int(n) for n in numeri]
-            altri_siti['Target_range'].iloc[i] = interi
-        except:
-            altri_siti['Target_range'].iloc[i] = numeri
+        numeri = altri_siti['Target_range'].iloc[i]
+        interi = [int(n) for n in numeri]
+        altri_siti['Target_range'].iloc[i] = interi
+        
             
 
     
