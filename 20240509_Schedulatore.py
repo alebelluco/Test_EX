@@ -176,8 +176,8 @@ with tab4:
     df_raw = df_raw[df_raw.Cliente != 'FERRARA TUA SPA']
     df_raw = df_raw[df_raw['Operatore'] != ' (FAT) (FAT)']
     if st.toggle('Rimuovi zanzare'):
-        df_raw = df_raw['ANTILARVALE' not in check for check in df_raw.Servizio]
-        df_raw = df_raw['ANTIADULTO' not in check for check in df_raw.Servizio]
+        df_raw = df_raw[['ANTILARVALE' not in check for check in df_raw.Servizio]]
+        df_raw = df_raw[['ANTIADULTO' not in check for check in df_raw.Servizio]]
         df_raw = df_raw[df_raw.Servizio != 'ALZE ANTILARVALE ZANZARE']
         df_raw = df_raw[df_raw.Servizio != 'AAAL ANTIADULTO E ANTILARVALE ZANZARE']
         df_raw = df_raw[df_raw.Servizio != 'ANTILARVALE CADITOIE FERRARA - GIRO 5 - SQUADRA 2']
