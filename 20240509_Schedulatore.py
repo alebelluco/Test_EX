@@ -1,6 +1,6 @@
 # To-do
 # Corretto bug per interventi 2 OP, inserito reseti index df prima di calcolare la lunghezza x inserimento riga sdoppiata
-# da correggere: se il secondo op non ha abbastanza tempo gli sdoppia l'intervento e non va bene --- verificare se succede o se era problema di cache
+# aggiornato 23-07-25
 
 import streamlit as st
 import matplotlib.pyplot as plt
