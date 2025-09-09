@@ -157,8 +157,8 @@ with tab4:
     df_raw = df_raw[df_raw['Operatore'] != ' (FAT) (FAT)']
 
     if st.toggle('Rimuovi zanzare'):
-        df_raw = df_raw[['ANTILARVALE' not in check for check in df_raw.Servizio]]
-        df_raw = df_raw[['ANTIADULTO' not in check for check in df_raw.Servizio]]
+        df_raw = df_raw[['ANTILARVALE' not in check for check in df_raw.Servizio.astype(str)]]
+        df_raw = df_raw[['ANTIADULTO' not in check for check in df_raw.Servizio.astype(str)]]
 
     else:
         df_raw = df_raw
