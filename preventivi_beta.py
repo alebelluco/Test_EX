@@ -52,7 +52,7 @@ dic_voci = {
         'Demuscazione':5,
         'Disinfestazione - Saturazione':5,
         'Derattizzazione':5,
-        'Piccioni':5
+        'Piccioni':0
     }
 
 # Materiali
@@ -190,12 +190,20 @@ with t_viaggio:
     st.divider()
 
     v10,v15,v20 = st.columns([1,1,2])
+    
     with v10:
+
         st.subheader('Inserimento dati')
+
         if st.checkbox('2 Operatori'):
             op=2
+
+        elif st.checkbox('Più di 2 Operatori'):
+            op = st.number_input('Inserire il numero di operatori', step=1)
+
         else:
             op=1
+
         durata_intervento = st.number_input('Durata intervento (escluso il viaggio)', step=5,key='d1')
         durata_viaggio = st.number_input('Inserire durata viaggio in minuti', step=5)
         mezzo = st.selectbox('Selezionare mezzo', options = df_automezzi[['Ple' not in check for check in df_automezzi.Mezzo]].Mezzo.unique()) #escludo le ple
@@ -234,27 +242,30 @@ with t_viaggio:
 
         if st.toggle('Nolo PLE'):
             mezzo_ple = st.selectbox('Selezionare modello PLE', options = dic_ple.keys())
+            giorni_nolo = st.number_input('Giorni di nolo PLE', value=1, step=1)
             voci_viaggio.append(f'Nolo giornaliero {mezzo_ple}')
             cat_v.append('Nolo')
-            qty_v.append(1)
+            qty_v.append(giorni_nolo)
             um_v.append('ND')
             unit_v.append(dic_ple[mezzo_ple])
-            imp_v.append(dic_ple[mezzo_ple])
+            imp_v.append(dic_ple[mezzo_ple]*giorni_nolo)
             voci_viaggio.append('Quota fissa gasolio PLE (50€)')
             cat_v.append('Nolo')
-            qty_v.append(1)
+            qty_v.append(giorni_nolo)
             um_v.append('ND')
             unit_v.append(50)
-            imp_v.append(50)
+            imp_v.append(50*giorni_nolo)
+
 
         if st.toggle('Buono pasto'):
+            giorni_intervento = st.number_input('Selezionare giorni di intervento', value=1, step=1)
             pasto = dic_altro['Buono pasto']
-            voci_viaggio.append(f'Buono pasto per {op} operatori')
+            voci_viaggio.append(f'Buono pasto per {op} operatori per {giorni_intervento} giorni')
             cat_v.append('Pasti')
-            qty_v.append(op)
+            qty_v.append(op*giorni_intervento)
             um_v.append('ND')
             unit_v.append(pasto)
-            imp_v.append(pasto*op)
+            imp_v.append(pasto*op*giorni_intervento)
 
         #cat_v
         #voci_viaggio
@@ -295,6 +306,22 @@ with t_att:
                                        'H',
                                        mdo,
                                        mdo*durata_intervento/60*op]
+        
+        
+        st.subheader('Importo a corpo')
+
+        testo_corpo = st.text_input('Descrizione voce a corpo', value='Altri importi a corpo')
+        importo_corpo = st.number_input('Importo a corpo', step=1)
+        
+        if importo_corpo != 0:
+            tabella_a.loc[len(tabella_a)]=['Altro',
+                                        f'{testo_corpo}',
+                                        'ND',
+                                        'ND',
+                                        'ND',
+                                        importo_corpo]
+        
+        
         tabella_a
 
     with a30:
@@ -388,6 +415,8 @@ with t_riep:
             )
         
         scarica_excel(tabella_totale, f'Preventivo - {intervento}.xlsx')
+
+
 
 
 
