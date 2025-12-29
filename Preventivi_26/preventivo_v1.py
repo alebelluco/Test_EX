@@ -10,7 +10,6 @@ from io import BytesIO
 st.title('Configuratore preventivi')
 
 
-
 # caricamento informazioni
 path = st.file_uploader('Caricare file')
 if not path:
