@@ -537,7 +537,7 @@ with t_riep:
 
             except:
                 st.error('Problemi nel caricamento del template')
-                
+                st.stop()
             
             try:
                 
