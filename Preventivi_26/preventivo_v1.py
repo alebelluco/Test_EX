@@ -574,13 +574,22 @@ with t_riep:
                                             run.add_text(part)
                                     else:
                                         run.text = run.text.replace(key, str(value))
-                    
+           
+
+           
                     # Pulizia vecchi placeholder
                     for run in para.runs:
                         for old_key in ['[[TITOLO]]', '[[PREZZO]]', '[[TABELLA_1]]', '[[TABELLA_2]]']:
                             if old_key in run.text:
                                 run.text = run.text.replace(old_key, '')
 
+            except:
+                st.error('errore prima della riga 578')
+
+
+            
+            try:
+            
                 # Salvataggio in buffer
                 target_stream = BytesIO()
                 doc.save(target_stream)
@@ -593,7 +602,7 @@ with t_riep:
                     file_name=f"Preventivo_{intervento if intervento else 'nuovo'}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
-            except Exception as e:
-                st.error(f"Errore durante la generazione del Word: {e}")
+            except:
+                st.error(f"Errore durante la generazione del Word")
                 st.info("Assicurati che 'modellonew.docx' sia presente nella cartella dello script.")
 
