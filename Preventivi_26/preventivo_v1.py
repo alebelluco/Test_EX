@@ -44,6 +44,7 @@ dic_ple = dict(zip(df_ple.Mezzo, df_ple['Nolo giornaliero']))
 # CONFIGURAZIONE SEZIONI
 # PRODOTTI E MATERIALI
 # Prodotti chimici
+
 # definisco un numero di voci da inserire in base al tipo di intervento
 dic_voci = {
         'Disinfestazione insetti striscianti':5,
@@ -52,7 +53,7 @@ dic_voci = {
         'Demuscazione':5,
         'Disinfestazione - Saturazione':5,
         'Derattizzazione':5,
-        'Piccioni':1
+        'Piccioni':5
     }
 
 # Materiali
