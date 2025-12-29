@@ -526,7 +526,21 @@ with t_riep:
 
         # Template path
         #template_path = 'modellonew.docx' 
-        template_path = 'https://raw.githubusercontent.com/alebelluco/Test_EX/main/Preventivi_26/modellonew.docx'
+
+
+        import requests
+
+        url = "https://raw.githubusercontent.com/alebelluco/Test_EX/main/Preventivi_26/modellonew.docx"
+        local_path = "modellonew.docx"
+
+        r = requests.get(url)
+        with open(local_path, "wb") as f:
+            f.write(r.content)
+
+
+
+        
+        template_path = "modellonew.docx"
         
         if st.button('Genera Documento Word'):
 
