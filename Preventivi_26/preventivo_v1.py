@@ -44,7 +44,6 @@ dic_ple = dict(zip(df_ple.Mezzo, df_ple['Nolo giornaliero']))
 # CONFIGURAZIONE SEZIONI
 # PRODOTTI E MATERIALI
 # Prodotti chimici
-
 # definisco un numero di voci da inserire in base al tipo di intervento
 dic_voci = {
         'Disinfestazione insetti striscianti':5,
@@ -410,9 +409,9 @@ with t_att:
         if importo_corpo != 0:
             tabella_a.loc[len(tabella_a)]=['Altro',
                                         f'{testo_corpo}',
-                                        'ND',
-                                        'ND',
-                                        'ND',
+                                        None,
+                                        None,
+                                        None,
                                         importo_corpo]
         
         
@@ -432,7 +431,7 @@ with t_riep:
 
     
     costo_totale = tabella_totale.Importo.sum()
-    tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,'Costo diretto',costo_totale]
+    tabella_totale.loc[len(tabella_totale)] = [None,'Costo diretto',None,None,None,costo_totale]
     #tabella_totale
 
    
@@ -451,42 +450,41 @@ with t_riep:
             testo_magnot = f'Maggiorazione notturna {mag_not*100}%'
             importo_magnot = '€ {:0.2f}'.format(mag_not*costo_totale)
             st.metric(testo_magnot, value=importo_magnot)
-            tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,testo_magnot,mag_not*costo_totale]
+            tabella_totale.loc[len(tabella_totale)] = [None,testo_magnot,None,None,None,mag_not*costo_totale]
 
         if st.checkbox('Maggiorazione Festivo'):
             mag_fes = dic_altro['Maggiorazione festivo']
             testo_magfes = f'Maggiorazione festivo {mag_fes*100}%'
             importo_magfes = '€ {:0.2f}'.format(mag_fes*costo_totale)
             st.metric(testo_magfes, value=importo_magfes)
-            tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,testo_magfes,mag_fes*costo_totale]
+            tabella_totale.loc[len(tabella_totale)] = [None,testo_magfes,None,None,None,mag_fes*costo_totale]
 
         if st.checkbox('Maggiorazione Urgenza'):
             mag_urg = dic_altro['Urgenza']*(durata_intervento+durata_viaggio)/60
             testo_magurg= f'Maggiorazione urgenza'
             importo_magurg = '€ {:0.2f}'.format(mag_urg)
             st.metric(testo_magurg, value=importo_magurg)
-            tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,testo_magurg,mag_urg]
+            tabella_totale.loc[len(tabella_totale)] = [None,testo_magurg,None,None,None,mag_urg]
         
         costo_diretto = costo_totale+mag_not*costo_totale+mag_fes*costo_totale+mag_urg
-        tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,'Costo incluse maggiorazioni',costo_diretto]
-
+        tabella_totale.loc[len(tabella_totale)] = [None,'Costo incluse maggiorazioni',None,None,None,costo_diretto]
         st.metric('Costo diretto totale', value=('€ {:0.2f}'.format(costo_diretto)), border=True)
         st.subheader(':orange[Calcolo costi generali + Profitto]', divider='orange')
         oh = st.number_input('Inserire % markup costi generali', step=0.05, value=0.2)
         st.metric('Costi generali ({:0.2f}%)'.format(oh*100), value='€ {:0.2f}'.format(costo_diretto*oh),border=True)
 
-        tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,'Costi generali ({:0.2f}%)'.format(oh*100),costo_diretto*oh]
+        tabella_totale.loc[len(tabella_totale)] = [None,'Costi generali ({:0.2f}%)'.format(oh*100),None,None,None,costo_diretto*oh]
 
         costo_totale = costo_diretto*(1+oh)
-        tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,'Costo totale',costo_totale]
+        tabella_totale.loc[len(tabella_totale)] = [None,'Costo totale',None,None,None,costo_totale]
         profit = st.number_input('Inserire % markup profitto', step=0.05, value=0.2)
         st.metric('Margine aziendale {:0.2f}%'.format(profit*100), value='€ {:0.2f}'.format(costo_totale*(profit)), border=True)
-        tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,'Margine aziendale {:0.2f}%'.format(profit*100),profit*costo_totale]
+        tabella_totale.loc[len(tabella_totale)] = [None,'Margine aziendale {:0.2f}%'.format(profit*100),None,None,None,profit*costo_totale]
 
         prezzo = costo_totale * (1+profit)
         st.subheader(':orange[Prezzo finale]', divider='orange')
         st.metric('Prezzo finale', value='€ {:0.2f}'.format(prezzo))
-        tabella_totale.loc[len(tabella_totale)] = [None,None,None,None,'Prezzo finale',prezzo]
+        tabella_totale.loc[len(tabella_totale)] = [None,'Prezzo finale',None,None,None,prezzo]
 
     with r20:
         st.subheader('Tabella riepilogativa')
@@ -526,9 +524,7 @@ with t_riep:
             note_tecniche = st.text_area('Note tecniche', value='Mirato al controllo dei topi e ratti;\nEseguito sulle aree di proprietà.')
 
         # Template path
-        template_path = 'https://github.com/alebelluco/Test_EX/blob/main/Preventivi_26/modellonew.docx?raw=True' 
-        #template_path = 'modellonew.docx'
-        
+        template_path = 'modellonew.docx' 
         
         if st.button('Genera Documento Word'):
             try:
@@ -593,5 +589,4 @@ with t_riep:
             except Exception as e:
                 st.error(f"Errore durante la generazione del Word: {e}")
                 st.info("Assicurati che 'modellonew.docx' sia presente nella cartella dello script.")
-
 
