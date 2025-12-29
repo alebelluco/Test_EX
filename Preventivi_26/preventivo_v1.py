@@ -526,7 +526,7 @@ with t_riep:
 
         # Template path
         #template_path = 'modellonew.docx' 
-        template_path = 'https://github.com/alebelluco/Test_EX/blob/main/Preventivi_26/modellonew.docx'
+        template_path = 'https://github.com/alebelluco/Test_EX/blob/main/Preventivi_26/modellonew.docx?raw=True'
         
         if st.button('Genera Documento Word'):
 
