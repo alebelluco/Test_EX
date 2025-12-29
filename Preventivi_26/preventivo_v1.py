@@ -529,18 +529,6 @@ with t_riep:
 
 
         
-                
-        # Download del template da GitHub
-        url = "https://raw.githubusercontent.com/alebelluco/Test_EX/main/Preventivi_26/modellonew.docx"
-        try:
-            response = requests.get(url)
-            response.raise_for_status() # Controlla errori HTTP
-            template_source = BytesIO(response.content)
-            doc = Document(template_source)
-        except Exception as e_download:
-            st.warning(f"Impossibile scaricare il template da GitHub ({e_download}). Provo caricamento locale...")
-            doc = Document('modellonew.docx')
-        
         if st.button('Genera Documento Word'):
 
             try:
