@@ -7,7 +7,7 @@ from io import BytesIO
 #from docx import Document
 #from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 #from docx.enum.style import WD_STYLE_TYPE
-st.title('Configuratore preventivi')
+st.title('Configuratore preventivi_dic25')
 
 
 
