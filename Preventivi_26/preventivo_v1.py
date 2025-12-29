@@ -52,7 +52,7 @@ dic_voci = {
         'Demuscazione':5,
         'Disinfestazione - Saturazione':5,
         'Derattizzazione':5,
-        'Piccioni':5
+        'Piccioni':1
     }
 
 # Materiali
