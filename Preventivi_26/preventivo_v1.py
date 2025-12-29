@@ -524,7 +524,8 @@ with t_riep:
             note_tecniche = st.text_area('Note tecniche', value='Mirato al controllo dei topi e ratti;\nEseguito sulle aree di proprietà.')
 
         # Template path
-        template_path = 'modellonew.docx' 
+        #template_path = 'modellonew.docx' 
+        template_path = 'https://github.com/alebelluco/Test_EX/blob/main/Preventivi_26/modellonew.docx'
         
         if st.button('Genera Documento Word'):
             try:
