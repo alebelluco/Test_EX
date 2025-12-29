@@ -528,27 +528,38 @@ with t_riep:
         #template_path = 'modellonew.docx' 
 
 
-        import requests
-
-        url = "https://raw.githubusercontent.com/alebelluco/Test_EX/main/Preventivi_26/modellonew.docx"
-        local_path = "modellonew.docx"
-
-        r = requests.get(url)
-        with open(local_path, "wb") as f:
-            f.write(r.content)
-
-
-
         
-        template_path = "modellonew.docx"
+                
+        # Download del template da GitHub
+        url = "https://raw.githubusercontent.com/alebelluco/Test_EX/main/Preventivi_26/modellonew.docx"
+        try:
+            response = requests.get(url)
+            response.raise_for_status() # Controlla errori HTTP
+            template_source = BytesIO(response.content)
+            doc = Document(template_source)
+        except Exception as e_download:
+            st.warning(f"Impossibile scaricare il template da GitHub ({e_download}). Provo caricamento locale...")
+            doc = Document('modellonew.docx')
         
         if st.button('Genera Documento Word'):
 
             try:
+                
                 from docx import Document
                 import datetime
+                import requests
+
+                # Download del template da GitHub
+                url = "https://raw.githubusercontent.com/alebelluco/Test_EX/main/Preventivi_26/modellonew.docx"
+                try:
+                    response = requests.get(url)
+                    response.raise_for_status() # Controlla errori HTTP
+                    template_source = BytesIO(response.content)
+                    doc = Document(template_source)
+                except Exception as e_download:
+                    st.warning(f"Impossibile scaricare il template da GitHub ({e_download}). Provo caricamento locale...")
+                    doc = Document('modellonew.docx')
                 
-                doc = Document(template_path)
 
             except:
                 st.error('Problemi nel caricamento del template')
