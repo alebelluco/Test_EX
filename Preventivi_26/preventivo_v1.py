@@ -528,12 +528,18 @@ with t_riep:
         template_path = 'https://github.com/alebelluco/Test_EX/blob/main/Preventivi_26/modellonew.docx'
         
         if st.button('Genera Documento Word'):
+
             try:
-                # Carica il documento
                 from docx import Document
                 import datetime
                 
                 doc = Document(template_path)
+
+            except:
+                st.error('Problemi nel caricamento del template')
+                
+            
+            try:
                 
                 # Sostituzioni semplici nei paragrafi
                 today = datetime.date.today().strftime('%d/%m/%Y')
