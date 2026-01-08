@@ -57,13 +57,13 @@ with tab1:
 
 
     st.subheader('Interventi in Standby a partire dai mesi selezionati', divider='orange')
-                                
-    st.dataframe(df_scaduto_standby[[ data.month in valore_scaduto for data in df_scaduto_standby['Data Inizio']]].style.apply(highlight_tipo, axis=1),width=2500)
-    st.markdown('{:0.0f} interventi in Standby'.format(len(df_scaduto_standby[[ data.month in valore_scaduto for data in df_scaduto_standby['Data Inizio']]])))
-    
-    st.subheader('Interventi scaduti da inizio anno non in Standby a partire dai mesi selezionati', divider='orange')
-    st.dataframe(df_scaduto_no_standby[[ data.month in valore_scaduto for data in df_scaduto_no_standby['Data Inizio']]].style.apply(highlight_tipo, axis=1),width=2500)
-    st.markdown('{:0.0f} interventi non in Standby e non eseguiti'.format(len(df_scaduto_no_standby[[ data.month in valore_scaduto for data in df_scaduto_no_standby['Data Inizio']]])))
+    if len(df_scaduto_standby)!=0:                           
+        st.dataframe(df_scaduto_standby[[ data.month in valore_scaduto for data in df_scaduto_standby['Data Inizio']]].style.apply(highlight_tipo, axis=1),width=2500)
+        st.markdown('{:0.0f} interventi in Standby'.format(len(df_scaduto_standby[[ data.month in valore_scaduto for data in df_scaduto_standby['Data Inizio']]])))
+        
+        st.subheader('Interventi scaduti da inizio anno non in Standby a partire dai mesi selezionati', divider='orange')
+        st.dataframe(df_scaduto_no_standby[[ data.month in valore_scaduto for data in df_scaduto_no_standby['Data Inizio']]].style.apply(highlight_tipo, axis=1),width=2500)
+        st.markdown('{:0.0f} interventi non in Standby e non eseguiti'.format(len(df_scaduto_no_standby[[ data.month in valore_scaduto for data in df_scaduto_no_standby['Data Inizio']]])))
 
 with tab4:
     
