@@ -11,7 +11,7 @@ import math
 import xlrd
 
 st.set_page_config(page_title="Planner interventi", layout='wide')
-anno_corrente = 2025
+anno_corrente = 2026
 tab1, tab4, tab_siti = st.tabs(['Scaduto', 'Input programmazione', 'Errori coordinate'])
 
 with tab1:
