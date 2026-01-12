@@ -57,7 +57,10 @@ with tab1:
 
 
     st.subheader('Interventi in Standby a partire dai mesi selezionati', divider='orange')
-    if len(df_scaduto_standby)!=0:                           
+
+    if len(df_scaduto_standby)!=0:
+               
+
         st.dataframe(df_scaduto_standby[[ data.month in valore_scaduto for data in df_scaduto_standby['Data Inizio']]].style.apply(highlight_tipo, axis=1),width=2500)
         st.markdown('{:0.0f} interventi in Standby'.format(len(df_scaduto_standby[[ data.month in valore_scaduto for data in df_scaduto_standby['Data Inizio']]])))
         
@@ -156,14 +159,14 @@ with tab4:
     df_raw = df_raw[df_raw.Cliente != 'FERRARA TUA SPA']
     df_raw = df_raw[df_raw['Operatore'] != ' (FAT) (FAT)']
 
-    if st.toggle('Rimuovi zanzare'):
-        df_raw = df_raw[['ANTILARVALE' not in check for check in df_raw.Servizio.astype(str)]]
-        df_raw = df_raw[['ANTIADULTO' not in check for check in df_raw.Servizio.astype(str)]]
 
+    if st.toggle('Rimuovi zanzare'):
+        df_raw = df_raw[['ANTILARVALE' not in check for check in df_raw.Servizio]]
+        df_raw = df_raw[['ANTIADULTO' not in check for check in df_raw.Servizio]]
+  
     else:
         df_raw = df_raw
 
-    
 
     #creazione delle chiavi
     df_raw['key'] = df_raw.Cliente + df_raw.Sito + " | " + df_raw['Indirizzo Sito'] + df_raw.Servizio
@@ -198,10 +201,13 @@ with tab4:
 
     # Calcolo della prima data pianificabile
 
-    calendario_pianificazione = calendario_no_domeniche(mese_n,anno_corrente,'standard')
 
+    calendario_pianificazione = calendario_no_domeniche(mese_n,anno_corrente,'standard')
     oggi_day = oggi.day#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
     index_oggi = calendario_pianificazione[calendario_pianificazione.day_n==oggi_day].day_n.index[0]
+
+
+
 
 #next working
     
@@ -569,4 +575,6 @@ with tab_siti:
 
     st.write('Siti con errori')
     st.dataframe(siti_errori)
+
+
 
